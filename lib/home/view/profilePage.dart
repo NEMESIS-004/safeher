@@ -22,10 +22,16 @@ class _ProfilePageState extends State<ProfilePage> {
     _dbref = FirebaseFirestore.instance.collection('userdata');
     DocumentSnapshot document = await _dbref.doc(_userId).get();
     map = document.data() as Map;
+    debugPrint(map.toString());
 
     setState(() {
       isLoading = false;
     });
+  }
+
+  @override
+  void initState() {
+    getUserData();
   }
 
   @override
@@ -58,11 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ],
                           ),
-                          child: Icon(
-                            Icons.person,
-                            size: 80,
-                            color: Colors.grey.shade300,
-                          ),
+                          child: Image.network(map['profilepic'])
                         ),
                         const SizedBox(
                           height: 20,

@@ -20,63 +20,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Position? _currentPosition;
-  String userId = FirebaseAuth.instance.currentUser!.uid;
-
-  final geo = GeoFlutterFire();
-  Future<bool> _handleLocationPermission() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location services are disabled. Please enable the services')));
-      return false;
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location permissions are permanently denied, we cannot request permissions.')));
-      return false;
-    }
-    return true;
-  }
-
-  // Function to get current location of driver using geolocator
-  Future<void> _getCurrentPosition() async {
-    final hasPermission = await _handleLocationPermission();
-
-    if (!hasPermission) return;
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      setState(() => _currentPosition = position);
-    }).catchError((e) {
-      debugPrint(e);
-    });
-  }
-
-  void _updateLocation() async {
-    await _getCurrentPosition();
-    GeoFirePoint userLocation = geo.point(
-        latitude: _currentPosition!.latitude,
-        longitude: _currentPosition!.longitude);
-    FirebaseFirestore.instance
-        .collection('userdata')
-        .doc(userId)
-        .update({'position': userLocation.data});
-  }
-
   List<CameraDescription> cameras = [];
   late CameraController _controller;
   late VideoPlayerController _videoController =
@@ -89,16 +32,15 @@ class _HomePageState extends State<HomePage> {
       cameras[0],
       ResolutionPreset.medium,
     );
-    val = 1;
+    setState(() {
+      val = 1;
+    });
   }
 
   @override
   void initState() {
     super.initState();
     camsetup();
-    Timer.periodic(const Duration(seconds: 5), (timer) {
-      _updateLocation();
-    });
   }
 
   @override
