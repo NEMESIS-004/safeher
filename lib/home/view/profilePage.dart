@@ -31,6 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
+    super.initState();
     getUserData();
   }
 
@@ -51,21 +52,20 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            border: Border.all(width: 5, color: Colors.white),
-                            color: Colors.white,
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 20,
-                                offset: Offset(5, 5),
-                              ),
-                            ],
-                          ),
-                          child: Image.network(map['profilepic'])
-                        ),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(width: 5, color: Colors.white),
+                              color: Colors.white,
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 20,
+                                  offset: Offset(5, 5),
+                                ),
+                              ],
+                            ),
+                            child: Image.network(map['profilepic'])),
                         const SizedBox(
                           height: 20,
                         ),

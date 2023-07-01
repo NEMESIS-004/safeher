@@ -162,8 +162,8 @@ class _ServiceActivatorState extends State<ServiceActivator> {
       // print("accx = $_accelX");
       // print("accy = $_accelY");
       if ((result < 1) ||
-          (result > 70 && _accelZ > 70 && _accelX > 70) ||
-          (result > 70 && _accelX > 70 && _accelY > 70)) {
+          (result > 70 && _accelZ > 60 && _accelX > 60) ||
+          (result > 70 && _accelX > 60 && _accelY > 60)) {
         // print("res = $result");
         // print("accz = $_accelZ");
         // print("accx = $_accelX");
@@ -283,6 +283,10 @@ class _ServiceActivatorState extends State<ServiceActivator> {
     }
   }
 
+  void _setupcam() async {
+    await widget.controller.initialize();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -292,11 +296,9 @@ class _ServiceActivatorState extends State<ServiceActivator> {
           setState(() {
             isRunning = !isRunning;
           });
-
           //print(isRunning);
 
           _setupSpeechRecognition();
-
           //Call your finctions here to start the service.
         },
         child: Padding(
