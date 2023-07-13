@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "SafeHer",
+      theme: ThemeData(),
       home: const SplashScreen(),
       routes: {
         HomePage.routeName: (ctx) => const HomePage(),

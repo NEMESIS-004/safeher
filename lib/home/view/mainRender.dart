@@ -11,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:safeher3/home/view/home.dart';
 import 'package:safeher3/home/view/nearbyPlaces.dart';
 import 'package:safeher3/home/view/profilePage.dart';
+import 'package:safeher3/home/view/widgets/globalAppBar.dart';
 
 class MainRender extends StatefulWidget {
   const MainRender({super.key});
@@ -20,7 +21,7 @@ class MainRender extends StatefulWidget {
 }
 
 class _MainRenderState extends State<MainRender> {
-  Widget? _child = const HomePage();
+  Widget _child = const HomePage();
   Position? _currentPosition;
   String userId = FirebaseAuth.instance.currentUser!.uid;
 
@@ -87,21 +88,20 @@ class _MainRenderState extends State<MainRender> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
       body: _child,
       bottomNavigationBar: FluidNavBar(
         icons: [
           FluidNavBarIcon(
               icon: Icons.home_rounded,
-              backgroundColor: Colors.pink,
+              backgroundColor: Colors.pink.shade600,
               extras: {"label": "home"}),
           FluidNavBarIcon(
               icon: Icons.navigation_rounded,
-              backgroundColor: Colors.pink,
+              backgroundColor: Colors.pink.shade600,
               extras: {"label": "Nearby Places"}),
           FluidNavBarIcon(
               icon: Icons.settings,
-              backgroundColor: Colors.pink,
+              backgroundColor: Colors.pink.shade600,
               extras: {"label": "settings"}),
         ],
         onChange: _handleNavigationChange,

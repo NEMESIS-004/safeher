@@ -4,39 +4,52 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:safeher3/home/view/settings.dart';
 
-class GlobalAppBar extends StatelessWidget {
-  const GlobalAppBar({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(
-        "SafeHer",
-        style: TextStyle(
-            color: Colors.pink,
-            fontSize: MediaQuery.of(context).size.width * 0.07,
-            fontWeight: FontWeight.w800),
-      ),
-      subtitle: Text(
-        "Your Safety, Our Priority",
-        style: TextStyle(
-            color: Colors.pinkAccent,
-            fontWeight: FontWeight.w700,
-            fontSize: MediaQuery.of(context).size.width * 0.03),
-      ),
-      trailing: Card(
-        elevation: 4,
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, SettingPage.routeName);
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Icon(FontAwesomeIcons.person, color: Colors.pink[500], size: 20),
+class GlobalAppBar {
+  show(String title, String subTitle, IconData icon) {
+    return AppBar(
+      toolbarHeight: 95,
+      backgroundColor: Colors.pink.shade600,
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        ),
+          Text(
+            subTitle,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w400,
+            ),
+          )
+        ],
       ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(top: 20.0, bottom: 20.0, right: 18.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15.0),
+              color: Colors.black.withOpacity(0.4),
+            ),
+            child: IconButton(
+              icon: Icon(
+                icon,
+                size: 28,
+                color: Colors.white,
+              ),
+              onPressed: () {},
+            ),
+          ),
+        )
+      ],
     );
   }
 }
