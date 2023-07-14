@@ -1,63 +1,227 @@
 // ignore_for_file: file_names
 
-import 'package:concentric_transition/concentric_transition.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 import 'package:safeher3/auth/signupPage.dart';
-import 'package:safeher3/auth/widgets/onboardingCard.dart';
 
-
-class OnboardingPage extends StatelessWidget {
+class OnboardingPage extends StatefulWidget {
   OnboardingPage({Key? key}) : super(key: key);
   static const routeName = 'onboarding';
-  final data = [
-    OnBoardingData(
-      title: "Title1",
-      subtitle:
-          "Some text with bla bla aaditya aman pragati aryan yash saurabh",
-      image: LottieBuilder.asset("assets/animations/womenHi.json"),
-      backgroundColor: const Color.fromRGBO(0, 10, 56, 1),
-      titleColor: Colors.pink,
-      subtitleColor: Colors.white,
-      background: LottieBuilder.asset("assets/animations/bg-1.json"),
-    ),
-    OnBoardingData(
-      title: "Title2",
-      subtitle: "Some text with bla bla aaditya aman pragati aryan yash saurabh Some text with bla bla aaditya aman pragati aryan yash saurabh",
-      image: LottieBuilder.asset("assets/animations/womenWalking.json"),
-      backgroundColor: Colors.white,
-      titleColor: Colors.purple,
-      subtitleColor: const Color.fromRGBO(0, 10, 56, 1),
-      background: LottieBuilder.asset("assets/animations/bg-2.json"),
-    ),
-    OnBoardingData(
-      title: "Title3",
-      subtitle: "Some text with bla bla aaditya aman pragati aryan yash saurabhSome text with bla bla aaditya aman pragati aryan yash saurabh",
-      image: LottieBuilder.asset("assets/animations/womenMessage.json"),
-      backgroundColor: const Color.fromRGBO(71, 59, 117, 1),
-      titleColor: Colors.yellow,
-      subtitleColor: Colors.white,
-      background: LottieBuilder.asset("assets/animations/bg-3.json"),
-    ),
+
+  @override
+  State<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends State<OnboardingPage> {
+  int _currentPage = 0;
+
+  late PageController _controller;
+
+  List colors = const [
+    Color(0xffDAD3C8),
+    Color(0xffFFE5DE),
+    Color(0xffDCF6E6),
   ];
+  AnimatedContainer _buildDots({
+    int? index,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(
+          Radius.circular(50),
+        ),
+        color: Colors.pink.shade600,
+      ),
+      margin: const EdgeInsets.only(right: 5),
+      height: 10,
+      curve: Curves.easeIn,
+      width: _currentPage == index ? 20 : 10,
+    );
+  }
+
+  @override
+  void initState() {
+    _controller = PageController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: ConcentricPageView(
-
-        duration: const Duration(seconds: 4),
-        colors: data.map((e) => e.backgroundColor).toList(),
-        itemCount: data.length,
-        itemBuilder: (int index) {
-          return OnBoardingCard(data: data[index]);
-        },
-        onFinish: () {
-          Navigator.pushReplacementNamed(
-            context, SignUpPage.routeName
-          );
-        },
+      backgroundColor: colors[_currentPage],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              flex: 3,
+              child: PageView.builder(
+                physics: const BouncingScrollPhysics(),
+                controller: _controller,
+                onPageChanged: (value) => setState(() => _currentPage = value),
+                itemCount: contents.length,
+                itemBuilder: (context, i) {
+                  return Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          contents[i].image,
+                          height: height / 100 * 35,
+                        ),
+                        SizedBox(
+                          height: (height >= 840) ? 60 : 30,
+                        ),
+                        Text(
+                          contents[i].title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "Mulish",
+                            fontWeight: FontWeight.w600,
+                            fontSize: (width <= 550) ? 30 : 35,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        Text(
+                          contents[i].desc,
+                          style: TextStyle(
+                            fontFamily: "Mulish",
+                            fontWeight: FontWeight.w300,
+                            fontSize: (width <= 550) ? 17 : 25,
+                          ),
+                          textAlign: TextAlign.center,
+                        )
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      contents.length,
+                      (int index) => _buildDots(
+                        index: index,
+                      ),
+                    ),
+                  ),
+                  _currentPage + 1 == contents.length
+                      ? Padding(
+                          padding: const EdgeInsets.all(30),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  SignUpPage.routeName, (route) => false);
+                            },
+                            child: const Text("START"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.pink.shade600,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              padding: (width <= 550)
+                                  ? const EdgeInsets.symmetric(
+                                      horizontal: 100, vertical: 20)
+                                  : EdgeInsets.symmetric(
+                                      horizontal: width * 0.2, vertical: 25),
+                              textStyle:
+                                  TextStyle(fontSize: (width <= 550) ? 13 : 17),
+                            ),
+                          ),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(30),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  _controller.jumpToPage(2);
+                                },
+                                style: TextButton.styleFrom(
+                                  elevation: 0,
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: (width <= 550) ? 13 : 17,
+                                  ),
+                                ),
+                                child: Text(
+                                  "SKIP",
+                                  style: TextStyle(color: Colors.pink.shade600),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _controller.nextPage(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeIn,
+                                  );
+                                },
+                                child: const Text("NEXT"),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.pink.shade600,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50),
+                                  ),
+                                  elevation: 0,
+                                  padding: (width <= 550)
+                                      ? const EdgeInsets.symmetric(
+                                          horizontal: 30, vertical: 20)
+                                      : const EdgeInsets.symmetric(
+                                          horizontal: 30, vertical: 25),
+                                  textStyle: TextStyle(
+                                      fontSize: (width <= 550) ? 13 : 17),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
+
+class OnboardingContents {
+  final String title;
+  final String image;
+  final String desc;
+
+  OnboardingContents({
+    required this.title,
+    required this.image,
+    required this.desc,
+  });
+}
+
+List<OnboardingContents> contents = [
+  OnboardingContents(
+    title: "Autonomous Threat Detection",
+    image: "assets/onboard_1.png",
+    desc:
+        "No need to press any button in case of any threat, SafeHer can automatically detect them and generate SOS.",
+  ),
+  OnboardingContents(
+    title: "Easy to configure",
+    image: "assets/onboard_2.png",
+    desc:
+        "You can quickly add or remove whom you want to share alert in case of any threat.",
+  ),
+  OnboardingContents(
+    title: "One tap service activator",
+    image: "assets/onboard_3.png",
+    desc:
+        "You can easily start or stop services of SafeHer with just one click.",
+  ),
+];

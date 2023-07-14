@@ -27,8 +27,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "SafeHer",
-      theme: ThemeData(),
+      theme: ThemeData(
+        fontFamily: 'Mulish',
+      ),
       home: const SplashScreen(),
+      debugShowCheckedModeBanner: false,
       routes: {
         HomePage.routeName: (ctx) => const HomePage(),
         LoginPage.routeName: (ctx) => const LoginPage(),

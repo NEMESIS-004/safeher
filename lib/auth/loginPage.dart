@@ -1,10 +1,9 @@
 // ignore_for_file: file_names, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:safeher3/alert.dart';
 import 'package:safeher3/auth/services/loginWithGoogle.dart';
-
-
+import 'package:safeher3/home/view/home.dart';
+import 'package:safeher3/home/view/mainRender.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,10 +21,8 @@ class _LoginPageState extends State<LoginPage> {
         child: MaterialButton(
           onPressed: () async {
             await googleservice().signInWithGoogle();
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const alertpage()),
-            );
+            Navigator.of(context).pushNamedAndRemoveUntil(
+                MainRender.routeName, (route) => false);
           },
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
           color: Colors.amber,
