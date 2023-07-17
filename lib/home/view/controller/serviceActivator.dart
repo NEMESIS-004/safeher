@@ -3,12 +3,17 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:csv/csv.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:safeher3/home/view/controller/nearbyUsers.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +49,9 @@ class _ServiceActivatorState extends State<ServiceActivator> {
   late Timer cooldowntimer;
   bool onchange = false;
   late Timer timer;
+  late double latitude;
+  late double longitude;
+  late String userName;
 
   // This function ask for Permissions and give status of it
   void _setupSpeechRecognition() async {
@@ -134,6 +142,8 @@ class _ServiceActivatorState extends State<ServiceActivator> {
       Navigator.of(context, rootNavigator: true).pop();
       audioPlayer.stop();
       await widget.controller.initialize();
+      await fetchLocation();
+      _sendEmailToCommunity();
       _startRecording();
     } else {
       print("WRONG DETECTION FOR VOICE");
@@ -209,6 +219,8 @@ class _ServiceActivatorState extends State<ServiceActivator> {
       Navigator.of(context, rootNavigator: true).pop();
       audioPlayer.stop();
       await widget.controller.initialize();
+      await fetchLocation();
+      _sendEmailToCommunity();
       _startRecording();
     } else {
       print("WRONG DETECTION FOR FALL");
@@ -263,24 +275,74 @@ class _ServiceActivatorState extends State<ServiceActivator> {
 
   Future<void> _sendEmailWithVideo(String filePath) async {
     final smtpServer = gmail('aman18may18@gmail.com', 'yqrnhxcsctaxxshe');
-
-    final message = Message()
-      ..from = const Address('aman18may18@gmail.com', 'aman')
-      ..recipients.add('priya.priyanka.ps.ps@gmail.com')
-      ..subject = 'Video Email';
-    final videoFile = File(filePath);
-    if (videoFile.existsSync()) {
-      message.attachments.add(FileAttachment(videoFile));
-    } else {
-      print('Video file does not exist: $filePath');
-      return;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool contactpckd = await prefs.getBool('contactpckd') ?? false;
+    bool emailpckd = await prefs.getBool('emailpckd') ?? false;
+    late String email1 = "", email2 = "", email3 = "";
+    if (emailpckd) {
+      email1 = await prefs.getString('email1').toString();
+      email2 = await prefs.getString('email2').toString();
+      email3 = await prefs.getString('email3').toString();
     }
+    List<String> ccList = [];
+    if (email1 != "" && email1 != 'null') {
+      ccList.add(email1);
+    }
+    if (email2 != "" && email2 != 'null') {
+      ccList.add(email2);
+    }
+    if (email3 != "" && email3 != 'null') {
+      ccList.add(email3);
+    }
+    final message = Message()
+      ..from = const Address('aman18may18@gmail.com', 'Team SafeHer')
+      ..recipients.add('priya.priyanka.ps.ps@gmail.com')
+      ..subject = 'Video Email'
+      ..html =
+          "<p>Hey! We identified that ${userName} is in some trouble and needs your help</p><br><b><a href='https://maps.google.com/?q=$latitude,$longitude'>View Her Location on Google Maps</a></b><br><br>A short video we captured of the incident has been attached below<br>Regards<br>Team SafeHer";
+    if (ccList.isNotEmpty) {
+      message.ccRecipients.addAll(ccList);
+    }
+    // final videoFile = File(filePath);
+    // if (videoFile.existsSync()) {
+    //   message.attachments.add(FileAttachment(videoFile));
+    // } else {
+    //   print('Video file does not exist: $filePath');
+    //   return;
+    // }
 
     try {
       final sendReport = await send(message, smtpServer);
     } catch (error) {
       print('Error sending email: $error');
     }
+  }
+
+  _sendEmailToCommunity() async {
+    final geo = GeoFlutterFire();
+    GeoFirePoint center = geo.point(latitude: latitude, longitude: longitude);
+    NearbyUsers nbyu = NearbyUsers(center);
+    var _currentEntries = nbyu.get();
+
+    _currentEntries.listen((listOfSnapshots) async {
+      for (DocumentSnapshot snapshot in listOfSnapshots) {
+        Map map = snapshot.data() as Map;
+        String mail = map['email'];
+        final smtpServer = gmail('aman18may18@gmail.com', 'yqrnhxcsctaxxshe');
+        final message = Message()
+          ..from = const Address('aman18may18@gmail.com', 'Team SafeHer')
+          ..recipients.add(mail)
+          ..subject = 'Need Help'
+          ..html =
+              "<p>Someone near your locality needs your help</p><br><b><a href='https://maps.google.com/?q=$latitude,$longitude'>View Location on Google Maps</a></b><br><br>Any help from your side is highly appriciated <br>Regards<br>Team SafeHer";
+        try {
+          final sendReport = await send(message, smtpServer);
+          debugPrint('Mail Sent :)');
+        } catch (error) {
+          print('Error sending email: $error');
+        }
+      }
+    });
   }
 
   void _setupcam() async {
@@ -385,5 +447,19 @@ class _ServiceActivatorState extends State<ServiceActivator> {
         ),
       ),
     );
+  }
+
+  fetchLocation() async {
+    var userId = FirebaseAuth.instance.currentUser!.uid;
+    var coll = await FirebaseFirestore.instance
+        .collection('userdata')
+        .doc(userId)
+        .get();
+
+    Map mp = coll.data() as Map;
+    GeoPoint currGeo = mp['position']['geopoint'] as GeoPoint;
+    userName = mp['name'];
+    latitude = currGeo.latitude;
+    longitude = currGeo.longitude;
   }
 }

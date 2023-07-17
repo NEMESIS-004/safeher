@@ -29,6 +29,8 @@ class MyApp extends StatelessWidget {
       title: "SafeHer",
       theme: ThemeData(
         fontFamily: 'Mulish',
+        primaryColor: Colors.pinkAccent,
+        primarySwatch: Colors.pink,
       ),
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,

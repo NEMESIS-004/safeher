@@ -77,12 +77,43 @@ class _MainRenderState extends State<MainRender> {
         .update({'position': userLocation.data});
   }
 
+  doesHomeExist() async {
+    try {
+      // Get reference to Firestore collection
+      var collectionRef = FirebaseFirestore.instance.collection('community');
+
+      var doc = await collectionRef.doc(userId).get();
+      if (doc.exists) {
+        return;
+      } else {
+        var userData = await FirebaseFirestore.instance
+            .collection('userdata')
+            .doc(userId)
+            .get();
+        Map map = userData.data() as Map;
+        await _getCurrentPosition();
+        GeoFirePoint userLocation = geo.point(
+            latitude: _currentPosition!.latitude,
+            longitude: _currentPosition!.longitude);
+        collectionRef.doc(userId).set({
+          'email': map['email'],
+          'phone': map['phone'],
+          'position': userLocation.data
+        });
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
     Timer.periodic(const Duration(seconds: 5), (timer) {
       _updateLocation();
     });
+    doesHomeExist();
   }
 
   @override
