@@ -8,7 +8,8 @@ import 'package:fluid_bottom_nav_bar/fluid_bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:safeher3/aman/screens/main_screen.dart';
+import 'package:safeher3/Map/MapPage.dart';
+// import 'package:safeher3/aman/screens/main_screen.dart';
 import 'package:safeher3/home/view/home.dart';
 // import 'package:safeher3/home/view/mapcrime.dart';
 import 'package:safeher3/home/view/nearbyPlaces.dart';
@@ -165,7 +166,7 @@ class _MainRenderState extends State<MainRender> {
           _child = const NearbyPlaces();
           break;
         case 2:
-          _child = const MainScreen();
+          _child = const MapPage();
         case 3:
           _child = const ProfilePage();
           break;
