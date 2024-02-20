@@ -1,4 +1,4 @@
-// ignore_for_file: camel_case_types, non_constant_identifier_names, avoid_types_as_parameter_names
+// ignore_for_file: camel_case_types, non_constant_identifier_names, avoid_types_as_parameter_names, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:safeher3/Map/Request_assistance.dart';

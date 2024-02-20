@@ -772,7 +772,6 @@ class _HomePageState extends ConsumerState<HomePage> {
       String name, String phone, String email, int id) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      height: 85,
       decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(15.0)),
@@ -817,8 +816,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Text(
                       email,
                       style: const TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                        fontSize: 14,
+                        fontSize: 10,
                       ),
                     )
                   ],

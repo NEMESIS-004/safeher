@@ -67,7 +67,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Column(
                                 children: [
                                   Container(
-                                      padding: const EdgeInsets.all(10),
                                       decoration: BoxDecoration(
                                         borderRadius:
                                             BorderRadius.circular(100),
@@ -82,7 +81,10 @@ class _ProfilePageState extends State<ProfilePage> {
                                           ),
                                         ],
                                       ),
-                                      child: Image.network(map['profilepic'])),
+                                      child: CircleAvatar(
+                                          radius: 44,
+                                          backgroundImage:
+                                              NetworkImage(map['profilepic']))),
                                   const SizedBox(
                                     height: 20,
                                   ),
@@ -139,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                                           ListTile(
                                                             contentPadding:
                                                                 const EdgeInsets
-                                                                        .symmetric(
+                                                                    .symmetric(
                                                                     horizontal:
                                                                         12,
                                                                     vertical:

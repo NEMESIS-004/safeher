@@ -1,7 +1,6 @@
 // ignore_for_file: file_names, avoid_print, unused_local_variable
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:safeher3/home/view/data/nearbyPlacesData.dart';
 import 'package:safeher3/home/view/widgets/globalAppBar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -124,9 +123,7 @@ class _NearbyPlacesState extends State<NearbyPlaces> {
                                                       placeList[index].api));
                                                 } catch (e) {
                                                   print(e);
-                                                  Fluttertoast.showToast(
-                                                      msg:
-                                                          "Something went wrong!");
+                                                  
                                                 }
                                               },
                                               textColor: Colors.white,
