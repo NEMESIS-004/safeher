@@ -270,7 +270,8 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
                       ? const Locale('en')
                       : const Locale('hi'),
                   child: Builder(builder: (context) {
-                    return Text(AppLocalizations.of(context)!.phoneFallAccident);
+                    return Text(
+                        AppLocalizations.of(context)!.phoneFallAccident);
                   })),
               content: Localizations.override(
                   context: context,
@@ -584,7 +585,6 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
                 ),
                 child: Container(
                   height: 180,
-                  width: MediaQuery.of(context).size.width * 0.9,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                   ),

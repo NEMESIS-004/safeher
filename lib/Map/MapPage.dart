@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, unused_element, use_build_context_synchronously, avoid_init_to_null, prefer_final_fields, avoid_print, unused_field, non_constant_identifier_names, unused_local_variable, avoid_types_as_parameter_names
+// ignore_for_file: file_names, unused_element, use_build_context_synchronously, avoid_init_to_null, prefer_final_fields, avoid_print, unused_field, non_constant_identifier_names, unused_local_variable, avoid_types_as_parameter_names, prefer_const_declarations, unused_import
 
 import 'dart:async';
 import 'package:http/http.dart' as http;
@@ -19,23 +19,19 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    getUserLocation().then(
-      (_) => {
-        getPolyLinePoints()
-            .then((coordinates) => generatePolyLinesPoints(coordinates)),
-      },
-    );
+    getUserLocation();
   }
 
   late double latitude;
   late double longitude;
-
+  String text = "greater noida";
   LatLng? cPos = null;
-  static LatLng _bGoogle = const LatLng(26.051, 82.051);
+  static LatLng bGoogle = const LatLng(24.051, 82.051);
   Completer<GoogleMapController> _mapcontroller =
       Completer<GoogleMapController>();
-
   Map<PolylineId, Polyline> polylines = {};
+
+
 
   // Request For Location
   Future<void> _requestLocationPermission() async {
@@ -69,44 +65,44 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Future<List<LatLng>> getPolyLinePoints() async {
-    List<LatLng> polylinecoor = [];
-    PolylinePoints polylinepoints = PolylinePoints();
-    PolylineResult result = await polylinepoints.getRouteBetweenCoordinates(
-        "AIzaSyBBJfgRGrYJrkNAdcMEKmdJQNJXEV4_Vo4",
-        PointLatLng(cPos!.latitude, cPos!.longitude),
-        PointLatLng(_bGoogle.latitude, _bGoogle.longitude),
-        travelMode: TravelMode.driving);
-    if (result.points.isNotEmpty) {
-      for (var point in result.points) {
-        polylinecoor.add(LatLng(point.latitude, point.longitude));
-      }
-    } else {
-      print("error");
-    }
-    return polylinecoor;
-  }
+
 
   void generatePolyLinesPoints(List<LatLng> polylinecoordinates) async {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
         polylineId: id,
-        color: Colors.blue,
+        color: Colors.pink,
         points: polylinecoordinates,
-        width: 8);
+        width: 4);
     setState(() {
       polylines[id] = polyline;
     });
   }
 
-  late double deslat;
-  late double destlng;
+
+
+  getSafePolyList(String ListofLatLang) {
+    List<LatLng> polylinecoor = [];
+    List<dynamic> coordinates = json.decode(ListofLatLang);
+    for (int i = 0; i < coordinates.length; i++) {
+      List<dynamic> coordinatePair = coordinates[i];
+      double la = coordinatePair[0];
+      double lo = coordinatePair[1];
+      polylinecoor.add(LatLng(la, lo));
+    }
+    return polylinecoor;
+  }
+
+
+
   getcoordinates(String s) async {
     const apiKey =
-        "AIzaSyBBJfgRGrYJrkNAdcMEKmdJQNJXEV4_Vo4"; // Replace with your actual API key
+        "AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww"; // Replace with your actual API key
     final query = Uri.encodeComponent(s);
     final url =
-        'https://maps.googleapis.com/maps/api/geocode/json?address=$query&key=$apiKey';
+        'https://maps.googleapis.com/maps/api/geocode/json?address=$query&key=AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww&alternatives=true';
+    print(
+        "##############################################################################");
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -117,48 +113,53 @@ class _MapPageState extends State<MapPage> {
             data['results'] != null &&
             data['results'].isNotEmpty) {
           final location = data['results'][0]['geometry']['location'];
-          deslat = location['lat'];
-          destlng = location['lng'];
           setState(() {
-            getPolyLinePoints2(latitude, longitude, deslat, destlng);
-            _bGoogle = LatLng(deslat, destlng);
+            bGoogle = LatLng(location["lat"], location["lng"]);
           });
+
+          String ListOfLatLang = await callFastAPI(latitude, longitude, s);
+
+          final polylineCoordinates = await getSafePolyList(ListOfLatLang);
+
+          generatePolyLinesPoints(polylineCoordinates);
+          // print(ListOfLatLang);
+          print(latitude);
+          print(longitude);
+          print(bGoogle.latitude);
+          print(bGoogle.longitude);
         }
       }
     } catch (e) {
-      print('Error: $e');
+      print(e);
     }
   }
 
-  getPolyLinePoints2(double lt1, double lg1, double lt2, double lg2) async {
-    List<LatLng> polylinecoor = [];
-    PolylinePoints polylinepoints = PolylinePoints();
-    PolylineResult result = await polylinepoints.getRouteBetweenCoordinates(
-        "AIzaSyBBJfgRGrYJrkNAdcMEKmdJQNJXEV4_Vo4",
-        PointLatLng(lt1, lg1),
-        PointLatLng(lt2, lg2),
-        travelMode: TravelMode.driving);
-    if (result.points.isNotEmpty) {
-      for (var point in result.points) {
-        polylinecoor.add(LatLng(point.latitude, point.longitude));
-      }
-    } else {
-      print("error");
-    }
-    generatePolyLinesPoints(polylinecoor);
-  }
 
-  void generatePolyLinesPoints2(List<LatLng> polylinecoordinates) async {
-    PolylineId id = const PolylineId("poly");
-    Polyline polyline = Polyline(
-        polylineId: id,
-        color: Colors.blue,
-        points: polylinecoordinates,
-        width: 8);
-    setState(() {
-      polylines[id] = polyline;
+
+  Future<String> callFastAPI(
+      double float1, double float2, String myString) async {
+    var apiUrl = Uri.parse('https://safe-route-api.onrender.com')
+        .replace(queryParameters: {
+      'source_lat': float1.toString(),
+      'source_long': float2.toString(),
+      'destination': myString,
     });
+
+    try {
+      var response = await http.post(apiUrl);
+      if (response.statusCode == 200) {
+        print('Request successful');
+        return response.body;
+      } else {
+        print('Request failed with status: ${response.statusCode}');
+        return "Failed to get data! Status code: ${response.statusCode}";
+      }
+    } catch (error) {
+      return "An error occurred while making the API call: $error";
+    }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -175,12 +176,12 @@ class _MapPageState extends State<MapPage> {
                   markers: {
                     Marker(
                         markerId: const MarkerId("_currentlocation"),
-                        icon: BitmapDescriptor.defaultMarker,
+                        icon: BitmapDescriptor.defaultMarkerWithHue(210),
                         position: cPos!),
                     Marker(
                         markerId: const MarkerId("_destlocation"),
                         icon: BitmapDescriptor.defaultMarker,
-                        position: _bGoogle),
+                        position: bGoogle),
                   },
                   polylines: Set<Polyline>.of(polylines.values),
                 ),
@@ -189,9 +190,8 @@ class _MapPageState extends State<MapPage> {
             right: 20,
             left: 30,
             child: TextFormField(
-              onChanged: (value) {
-                print(value);
-                if (value.length % 3 == 0) getcoordinates(value);
+              onChanged: (newValue) {
+                text = newValue;
               },
               cursorColor: Colors.black,
               decoration: const InputDecoration(
@@ -204,6 +204,19 @@ class _MapPageState extends State<MapPage> {
                       borderRadius: BorderRadius.horizontal()),
                   enabledBorder:
                       OutlineInputBorder(borderSide: BorderSide(width: 3))),
+            ),
+          ),
+          Positioned(
+            top: 140,
+            right: 20,
+            left: 30,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  getcoordinates(text);
+                });
+              },
+              child: const Text("send"),
             ),
           ),
         ],
