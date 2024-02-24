@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, unused_element, use_build_context_synchronously, avoid_init_to_null, prefer_final_fields, avoid_print, unused_field, non_constant_identifier_names, unused_local_variable, avoid_types_as_parameter_names, prefer_const_declarations, unused_import
 
 import 'dart:async';
+import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -30,8 +31,6 @@ class _MapPageState extends State<MapPage> {
   Completer<GoogleMapController> _mapcontroller =
       Completer<GoogleMapController>();
   Map<PolylineId, Polyline> polylines = {};
-
-
 
   // Request For Location
   Future<void> _requestLocationPermission() async {
@@ -65,8 +64,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-
-
   void generatePolyLinesPoints(List<LatLng> polylinecoordinates) async {
     PolylineId id = const PolylineId("poly");
     Polyline polyline = Polyline(
@@ -78,8 +75,6 @@ class _MapPageState extends State<MapPage> {
       polylines[id] = polyline;
     });
   }
-
-
 
   getSafePolyList(String ListofLatLang) {
     List<LatLng> polylinecoor = [];
@@ -93,11 +88,24 @@ class _MapPageState extends State<MapPage> {
     return polylinecoor;
   }
 
-
+  Future<String> getLocationDetails(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        Placemark placemark = placemarks.first;
+        return ''' Name: ${placemark.name} Street: ${placemark.street} SubLocality: ${placemark.subLocality} Locality: ${placemark.locality} AdministrativeArea: ${placemark.administrativeArea} Country: ${placemark.country} PostalCode: ${placemark.postalCode} ''';
+      } else {
+        return 'No detailed location information available.';
+      }
+    } catch (e) {
+      print('Error getting location details: $e');
+      return 'An error occurred while fetching location details.';
+    }
+  }
 
   getcoordinates(String s) async {
-    const apiKey =
-        "AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww"; // Replace with your actual API key
+    const apiKey = "AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww";
     final query = Uri.encodeComponent(s);
     final url =
         'https://maps.googleapis.com/maps/api/geocode/json?address=$query&key=AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww&alternatives=true';
@@ -120,13 +128,13 @@ class _MapPageState extends State<MapPage> {
           String ListOfLatLang = await callFastAPI(latitude, longitude, s);
 
           final polylineCoordinates = await getSafePolyList(ListOfLatLang);
-
+          // print(polylineCoordinates);
           generatePolyLinesPoints(polylineCoordinates);
-          // print(ListOfLatLang);
           print(latitude);
           print(longitude);
           print(bGoogle.latitude);
           print(bGoogle.longitude);
+          print(ListOfLatLang);
         }
       }
     } catch (e) {
@@ -134,12 +142,13 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-
-
   Future<String> callFastAPI(
       double float1, double float2, String myString) async {
+    final area = await getLocationDetails(latitude, longitude);
+    print(area);
     var apiUrl = Uri.parse('https://safe-route-api.onrender.com')
         .replace(queryParameters: {
+      "source": area,
       'source_lat': float1.toString(),
       'source_long': float2.toString(),
       'destination': myString,
@@ -151,15 +160,13 @@ class _MapPageState extends State<MapPage> {
         print('Request successful');
         return response.body;
       } else {
-        print('Request failed with status: ${response.statusCode}');
+        print('Request failed with status: ${response.body}');
         return "Failed to get data! Status code: ${response.statusCode}";
       }
     } catch (error) {
       return "An error occurred while making the API call: $error";
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
