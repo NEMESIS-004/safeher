@@ -105,10 +105,10 @@ class _MapPageState extends State<MapPage> {
   }
 
   getcoordinates(String s) async {
-    const apiKey = "AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww";
+    const apiKey = "";
     final query = Uri.encodeComponent(s);
     final url =
-        'https://maps.googleapis.com/maps/api/geocode/json?address=$query&key=AIzaSyB_D_sdhMz88ao9c-VvrWpN1J8chG0Gjww&alternatives=true';
+        'https://maps.googleapis.com/maps/api/geocode/json?address=$query&key=&alternatives=true';
     print(
         "##############################################################################");
 
@@ -223,7 +223,10 @@ class _MapPageState extends State<MapPage> {
                   getcoordinates(text);
                 });
               },
-              child: const Text("send"),
+              child: const Text(
+                "Find Your Safest Path",
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              ),
             ),
           ),
         ],
