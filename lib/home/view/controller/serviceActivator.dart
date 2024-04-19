@@ -1,6 +1,9 @@
-// ignore_for_file: file_names, non_constant_identifier_names, avoid_print, use_build_context_synchronously, no_leading_underscores_for_local_identifiers, unused_field, unused_local_variable, unused_element, prefer_final_fields, prefer_typing_uninitialized_variables, must_be_immutable, await_only_futures, unused_import
-
+// ignore_for_file: file_names, non_constant_identifier_names, avoid_print, use_build_context_synchronously, no_leading_underscores_for_local_identifiers, unused_field, unused_local_variable, unused_element, prefer_final_fields, prefer_typing_uninitialized_variables, must_be_immutable, await_only_futures, unused_import, duplicate_ignore
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'package:path/path.dart' as p;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:background_sms/background_sms.dart';
@@ -16,6 +19,7 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 import 'package:safeher3/home/view/controller/nearbyUsers.dart';
 import 'package:safeher3/riverpod.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -27,6 +31,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:string_similarity/string_similarity.dart';
 import 'package:vibration/vibration.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import "package:safeher3/home/view/controller/platform/a.dart";
+import "package:safeher3/home/view/controller/platform/audio_recorder_io.dart";
+import "package:safeher3/home/view/controller/platform/audio_recorder_web.dart";
 
 class ServiceActivator extends ConsumerStatefulWidget {
   const ServiceActivator(
@@ -65,60 +72,80 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
   String lang = "";
 
   // This function ask for Permissions and give status of it
-  void _setupSpeechRecognition() async {
-    fall_detection();
-    bool available = await _speech.initialize(
-      onStatus: (status) {
-        // print('Speech recognition status: $status');
-      },
-      onError: (error) {
-        // print('Speech recognition error: $error');
-        _startListening();
-      },
-    );
-    if (available) {
-      print('Speech recognition is available');
-      _startListening();
-    } else {
-      // print('Speech recognition is not available');
-    }
-  }
+
+  // void _setupSpeechRecognition() async {
+  //   fall_detection();
+  //   bool available = await _speech.initialize(
+  //     onStatus: (status) {
+  //       // print('Speech recognition status: $status');
+  //     },
+  //     onError: (error) {
+  //       // print('Speech recognition error: $error');
+  //       _startListening();
+  //     },
+  //   );
+  //   if (available) {
+  //     print('Speech recognition is available');
+  //     _startListening();
+  //   } else {
+  //     // print('Speech recognition is not available');
+  //   }
+  // }
 
 // This function is to SEND DATA AND RECIEVE THE PREDICTED OUTPUT
   void data_from_api(String text) async {
-    final csvString =
-        await rootBundle.loadString('assets/Women_Safety_dataset.csv');
-    final csvData = const CsvToListConverter().convert(csvString);
-    for (final row in csvData) {
-      if (row.isNotEmpty) {
-        String string1 = row[0].toString().toLowerCase();
-        var similarity = text.similarityTo(string1);
-        if (similarity >= 0.6 && canShowAppPrompt == true) {
-          print(similarity);
-          startTimer();
-          startCooldown();
-          break;
-        }
+    // final url = Uri.parse("https://safeher-model.onrender.com/analyze");
+    // final response = await http.post(url, body: {'text': text});
+    // if (response.statusCode == 200) {
+    //   print('Text sent successfully');
+    //   print(response.body);
+    //   if (response.body == "1") {
+    //     startTimer();
+    //     startCooldown();
+    //   }
+    // } else {
+    //   print('Failed to send text: ${response.reasonPhrase}');
+    // }
+    final url = Uri.parse("https://safeher-model.onrender.com/analyze");
+
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{'text': text}),
+    );
+    if (response.statusCode == 200) {
+      print("Generated output:");
+      print(response.body);
+      print(text);
+      if (int.parse(response.body[1]) == 1) {
+        startTimer();
+        startCooldown();
+      } else {
+        print("#############################");
       }
+    } else {
+      print("Error: ${response.statusCode}");
     }
   }
 
 // THIS FUNCTION LISTEN TO THE MICROPHONE AND GIVE THE TEXT GENERATED
-  void _startListening() {
-    _speech.listen(
-      listenFor: const Duration(seconds: 5),
-      onResult: (result) {
-        if (result.finalResult) {
-          String text = result.recognizedWords;
-          print('Recognized text: $text');
-          data_from_api(text.toLowerCase());
-        }
-        if (!_speech.isListening || sta == "done") {
-          _startListening();
-        }
-      },
-    );
-  }
+  // void _startListening() {
+  //   _speech.listen(
+  //     listenFor: const Duration(seconds: 5),
+  //     onResult: (result) {
+  //       if (result.finalResult) {
+  //         String text = result.recognizedWords;
+  //         print('Recognized text: $text');
+  //         data_from_api(text.toLowerCase());
+  //       }
+  //       if (!_speech.isListening || sta == "done") {
+  //         _startListening();
+  //       }
+  //     },
+  //   );
+  // }
 
   // This FUNCTION IS FOR THE APP PROMPT
   void startTimer() async {
@@ -191,6 +218,7 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
     } else {
       print("WRONG DETECTION FOR VOICE");
       threat = 0;
+      // _start();
       canShowAppPrompt = true;
       Vibration.cancel();
     }
@@ -218,6 +246,7 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
   // }
 
   // This Function Is For FALL DETECTION
+
   void fall_detection() {
     accelerometerEvents.listen((AccelerometerEvent event) {
       num _accelX = event.x.abs();
@@ -365,10 +394,6 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
   }
 
   Future<void> _stopRecording(String filePath) async {
-    if (!widget.controller.value.isRecordingVideo) {
-      return;
-    }
-
     try {
       final newpath = await widget.controller.stopVideoRecording();
       await _sendEmailWithVideo(newpath.path);
@@ -555,6 +580,198 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
     langLoad = false;
     super.initState();
     getLang();
+    _audioRecorder = AudioRecorder();
+
+    _recordSub = _audioRecorder.onStateChanged().listen((recordState) {
+      _updateRecordState(recordState);
+    });
+
+    _amplitudeSub = _audioRecorder
+        .onAmplitudeChanged(const Duration(milliseconds: 300))
+        .listen((amp) {
+      // setState(() => _amplitude = amp);
+      _amplitude = amp;
+    });
+    // _start();
+  }
+
+  bool cansenddata = false;
+  int _recordDuration = 0;
+  Timer? _timer;
+  AudioRecorder _audioRecorder = AudioRecorder();
+  StreamSubscription<RecordState>? _recordSub;
+  RecordState _recordState = RecordState.stop;
+  StreamSubscription<Amplitude>? _amplitudeSub;
+  Amplitude? _amplitude;
+
+  Future<String> _getPath() async {
+    final dir = await getApplicationDocumentsDirectory();
+    return p.join(
+      dir.path,
+      'audio_${DateTime.now().millisecondsSinceEpoch}.m4a',
+    );
+  }
+
+// asr
+  Future<String> asrcalling(String base64) async {
+    const String url =
+        "https://dhruva-api.bhashini.gov.in/services/inference/pipeline";
+
+    final Map<String, String> headers2 = {
+      "Authorization":
+          "Emyr4gTgApuoM02xmqq2MeUB4DveWFxy10DMTAVXppCW0-msLYPQ3BNW1s8T_KMv",
+      "Content-Type": "application/json",
+    };
+
+    final Map<String, dynamic> payload2 = {
+      "pipelineTasks": [
+        {
+          "taskType": "asr",
+          "config": {
+            "language": {"sourceLanguage": "en"},
+            "serviceId": "ai4bharat/whisper-medium-en--gpu--t4",
+            "samplingRate": 16000,
+          },
+        }
+      ],
+      "inputData": {
+        "audio": [
+          {"audioContent": base64}
+        ]
+      },
+    };
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: headers2,
+      body: jsonEncode(payload2),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      String audio_content = data["pipelineResponse"][0]["output"][0]["source"];
+      print("data $audio_content");
+      return audio_content;
+    } else {
+      print(response.statusCode);
+      return response.statusCode.toString();
+    }
+  }
+
+  Future<void> recordFile(AudioRecorder recorder, RecordConfig config) async {
+    final path = await _getPath();
+
+    await recorder.start(config, path: path);
+  }
+
+  Future<void> recordStream(AudioRecorder recorder, RecordConfig config) async {
+    final path = await _getPath();
+
+    final file = File(path);
+
+    final stream = await recorder.startStream(config);
+
+    stream.listen(
+      (data) {
+        // ignore: avoid_print
+        print(
+          recorder.convertBytesToInt16(Uint8List.fromList(data)),
+        );
+        file.writeAsBytesSync(data, mode: FileMode.append);
+      },
+      // ignore: avoid_print
+      onDone: () {
+        // ignore: avoid_print
+        print('End of stream. File written to $path.');
+      },
+    );
+  }
+
+  Future<void> _start() async {
+    fall_detection();
+    try {
+      if (await _audioRecorder.hasPermission()) {
+        const encoder = AudioEncoder.wav;
+
+        if (!await _isEncoderSupported(encoder)) {
+          return;
+        }
+
+        final devs = await _audioRecorder.listInputDevices();
+        debugPrint(devs.toString());
+
+        const config = RecordConfig(encoder: encoder, numChannels: 1);
+
+        // Record to file
+        await recordFile(_audioRecorder, config);
+
+        Timer(const Duration(seconds: 5), () async {
+          await _stop();
+          debugPrint("Recording stopped after 10 seconds");
+        });
+        _recordDuration = 0;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(e);
+      }
+    }
+  }
+
+  Future<void> _stop() async {
+    final path = await _audioRecorder.stop();
+    File audioFile = File(path ?? "");
+    List<int> audioBytes = await audioFile.readAsBytes();
+    String base64Audio = base64Encode(audioBytes);
+    String outputtext = await asrcalling(base64Audio);
+    // print(base64Audio);
+    print(outputtext);
+    data_from_api(outputtext);
+    print("hrhrhrhrhrh");
+    print(threat);
+    // if (threat == 0) {
+    _start();
+    // }
+  }
+
+  void _updateRecordState(RecordState recordState) {
+    _recordState = recordState;
+
+    switch (recordState) {
+      case RecordState.pause:
+        _timer?.cancel();
+        break;
+      case RecordState.record:
+        break;
+      case RecordState.stop:
+        _timer?.cancel();
+        _recordDuration = 0;
+        break;
+    }
+  }
+
+  bool islistening = true;
+  Future<bool> _isEncoderSupported(AudioEncoder encoder) async {
+    final isSupported = await _audioRecorder.isEncoderSupported(
+      encoder,
+    );
+
+    if (!isSupported) {
+      debugPrint('${encoder.name} is not supported on this platform.');
+      debugPrint('Supported encoders are:');
+
+      for (final e in AudioEncoder.values) {
+        if (await _audioRecorder.isEncoderSupported(e)) {
+          debugPrint('- ${encoder.name}');
+        }
+      }
+    }
+
+    return isSupported;
+  }
+
+  Future<void> _stopatlast() async {
+    final path = await _audioRecorder.stop();
   }
 
   @override
@@ -568,10 +785,13 @@ class _ServiceActivatorState extends ConsumerState<ServiceActivator> {
             onTap: () async {
               ref.read(ShieldStateProvider.notifier).toogleshieldstate();
               //print(isRunning);
-
-              await _getPermission();
-              _setupSpeechRecognition();
-              //Call your finctions here to start the service.
+              if (isRunning) {
+                _stopatlast();
+              } else {
+                await _getPermission();
+                _start();
+              }
+              // _setupSpeechRecognition();
             },
             child: Padding(
               padding: const EdgeInsets.all(5.0),

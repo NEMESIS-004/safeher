@@ -50,7 +50,7 @@ dependencies:
   geoflutterfire2: ^2.3.14
   speech_to_text: ^6.1.1
   http: ^0.13.5
-  audioplayers: ^1.1.0
+  audioplayers: ^5.2.1
   sensors_plus: ^2.0.3
   csv: ^5.0.2
   string_similarity: ^2.0.0
@@ -85,6 +85,7 @@ dependencies:
     sdk: flutter
   intl: any
   path: any
+  record: ^5.0.5
 
 dev_dependencies:
   flutter_test:
