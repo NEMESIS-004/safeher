@@ -1,16 +1,17 @@
 # SafeHer
 
-## Problem Addressed:
+## Problem Addressed: 
 The primary problem addressed by "SafeHer" is the safety of women in various situations, especially in potentially dangerous scenarios. The goal is to empower women and provide them with a tool that enhances their safety and confidence while navigating through their daily lives.
 
-Solution Impact: <BR/>
-**Voice Detection Technology:** The advanced voice detection technology automatically identifies potential danger based on voice cues.
+## Some notable features of the SafeHer app:
+**Threat Detection:** We have trained our ML model to detect threatful situations based on voice feeds received from users. Furthermore, we have integrated Bhashini API for language conversion allowing the app to be used in multiple languages, precisely in 19 regional languages. Apart from the voice feed the app also uses fall detection and high-pitch scream detection as other feeds to recognize threatful situations.
 
 **Effect:** Swift automatic alerts are sent to emergency contacts, nearby police stations, and other app users within a 2-kilometer range, providing immediate assistance in emergencies.
 
 **Video Evidence Generation:** In case of an alert, the app automatically captures a 30-second video recursively.Effect: Provides valuable evidence for incidents, aiding law enforcement and emergency contacts in understanding the situation and taking appropriate actions.
 
 **Map and Emergency Services Information:** The app provides users with maps of the surrounding area and nearby emergency services.
+
 **Effect:** Users can quickly locate and reach safety, enhancing their ability to respond effectively in emergencies.
 
 ## Tech Stack 📎
