@@ -14,6 +14,11 @@ The primary problem addressed by "SafeHer" is the safety of women in various sit
 
 **Effect:** Users can quickly locate and reach safety, enhancing their ability to respond effectively in emergencies.
 
+**Watch the video:&nbsp;&nbsp;&nbsp;&nbsp;**
+[![](https://img.youtube.com/vi/q7vZ2AGe7fo/0.jpg)](https://www.youtube.com/watch?v=q7vZ2AGe7fo)
+
+
+
 ## Tech Stack 📎
 
 <div>
